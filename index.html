@@ -2,13 +2,150 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tetris Clock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Tetris Clock (Pentotime)</title>
     <meta name="description" content="A clock made of falling Tetris shapes" />
-    <script type="module" crossorigin src="./assets/index-KBokJZuY.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Ddo-4BLx.css">
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="app-container">
+      <!-- Digital Time Header -->
+      <div class="time-header">
+        <div id="time-display" class="time-display">
+          <div id="time-digits" class="time-digits">12:00</div>
+          <!-- Saf Gösterge: 12H modunda AM/PM, 24H modunda 24H -->
+          <div id="time-ampm-badge" class="time-ampm-badge">PM</div>
+        </div>
+        <button id="toggle-time-btn" class="time-toggle-btn" aria-label="Toggle digital time">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 8C3 4.5 13 4.5 15 8C13 11.5 3 11.5 1 8Z" stroke-width="1.1"></path>
+            <circle cx="8" cy="8" r="1.8" stroke-width="1.1"></circle>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Controls Bar (Üst Menü - Sadeleşti) -->
+      <div class="controls-bar">
+        <!-- Dil Seçimi (Language Switcher) -->
+        <div class="format-pill lang-pill">
+          <button id="lang-tr-btn" class="format-btn active">TR</button>
+          <button id="lang-en-btn" class="format-btn">EN</button>
+        </div>
+
+        <!-- 12H / 24H Format Switcher -->
+        <div class="format-pill">
+          <button id="format-12-btn" class="format-btn active">12H</button>
+          <button id="format-24-btn" class="format-btn">24H</button>
+        </div>
+
+        <button id="sound-btn" class="btn-pill btn-sound" title="Sesi aç/kapat (S)">🔊 SOUND: ON</button>
+        <button id="theme-btn" class="btn-pill btn-theme" title="Renk temasını değiştirmek için tıkla (T)">🎨 CLASSIC</button>
+        <button id="crt-btn" class="btn-pill btn-crt" title="Tüplü TV / Scanline efektini aç/kapat (C)">📺 CRT: OFF</button>
+        <button id="fullscreen-btn" class="btn-pill btn-fullscreen" title="Tam Ekran Modu (F)">⛶ FULLSCREEN</button>
+        <button id="test-drop-btn" class="btn-pill btn-drop" title="Yeni şeklin süzülüşünü test etmek için tıkla (Space)">🚀 TEST DROP</button>
+        <button id="test-clear-btn" class="btn-pill btn-test" title="Saat başı efektini test etmek için tıkla">⚡ TEST CLEAR</button>
+      </div>
+
+      <!-- Grids and Preview Assembly -->
+      <div class="boards-wrapper">
+        <!-- Main Board Column (Hours + Minutes Wells) -->
+        <div class="main-board-column">
+          <div class="well-header-bar">
+            <div id="well-header-hours" class="well-header">HOURS</div>
+            <div id="well-header-minutes" class="well-header">MINUTES</div>
+          </div>
+
+          <!-- Dual 10x15 Wells -->
+          <div class="grids-container">
+            <div id="hours-grid" class="grid hours-grid"></div>
+            <div id="minutes-grid" class="grid minutes-grid"></div>
+          </div>
+
+          <!-- Legend -->
+          <div class="legend-bar">
+            <div class="legend-col">
+              <strong id="legend-hours-title">HOURS</strong>
+              <span id="legend-hours-desc">1 SHAPE = 1 HR</span>
+            </div>
+            <div class="legend-col">
+              <strong id="legend-mins-title">MINUTES</strong>
+              <span id="legend-mins-desc">1 SHAPE = 5 MIN • 1 BLOCK = 1 MIN</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Piece Preview Box (Right Side) -->
+        <div class="next-container">
+          <div id="next-title" class="next-title">NEXT</div>
+          <div id="next-grid" class="next-grid"></div>
+          <div id="next-countdown" class="next-footer">next in 60s</div>
+          <div id="drop-status-badge" class="status-badge">WAITING</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAM EKRAN ÇIKIŞ BUTONU (FARE HAREKETİNDE / DOKUNMADA GÖRÜNÜR) -->
+    <button id="fullscreen-exit-btn" class="fullscreen-exit-btn" title="Tam ekrandan çık (F / Esc)">🗗 ÇIKIŞ (F)</button>
+
+    <!-- EKRANIN SOL ALT KÖŞESİNDE SABİT INFO BUTONU -->
+    <button id="info-btn" class="fixed-info-btn" title="Bu saat nasıl çalışır? Öğrenmek ve denemek için tıkla">
+      <span>ℹ️</span>
+      <span id="info-btn-text">HOW IT WORKS</span>
+    </button>
+
+    <!-- POP-UP INFO & İNTERAKTİF TEST PENCERESİ -->
+    <div id="info-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div id="modal-title" class="modal-title">⚡ HOW PENTOTIME WORKS</div>
+          <button id="info-close-btn" class="modal-close-btn" aria-label="Kapat">✕</button>
+        </div>
+
+        <div class="info-guide-grid">
+          <div class="guide-card">
+            <h4 id="guide-hours-title">🏛️ SAAT KUYUSU (HOURS)</h4>
+            <p id="guide-hours-desc">Her bir <strong>Tetris şekli 1 Saattir</strong>. 12 saat boyunca tabanda 12 adet 5'li blok üst üste birikir.</p>
+          </div>
+          <div class="guide-card">
+            <h4 id="guide-mins-title">⏱️ DAKİKA KUYUSU (MINUTES)</h4>
+            <p id="guide-mins-desc">Her <strong>şekil 5 dakikayı</strong> temsil eder. Şeklin içindeki her <strong>tekli blok 1 dakikadır</strong>.</p>
+          </div>
+          <div class="guide-card">
+            <h4 id="guide-drop-title">🪂 SÜZÜLME (DROP)</h4>
+            <p id="guide-drop-desc">Yeni 5 dakikalık şekil gelmeden <strong>1 dakika önce</strong> (örn: 7:34) yukarıdan süzülür ve 7:35'te kilitlenir!</p>
+          </div>
+          <div class="guide-card">
+            <h4 id="guide-clear-title">⚡ SATIR SİLİNME (CLEAR)</h4>
+            <p id="guide-clear-desc">Saat başlarında dakika tahtası <strong>NES Tetris perde efektiyle</strong> temizlenir ve yeni saate geçilir.</p>
+          </div>
+        </div>
+
+        <!-- İnteraktif Deneme Alanı (Mini Grid + Barlar) -->
+        <div class="demo-section">
+          <div id="demo-title" class="demo-title">🎮 İNTERAKTİF DENEME ALANI</div>
+          <div id="demo-time-text" class="demo-display-bar">07:34 PM</div>
+
+          <div class="demo-grid-wrapper">
+            <div id="demo-hours-grid" class="demo-grid demo-hours-grid"></div>
+            <div id="demo-minutes-grid" class="demo-grid demo-minutes-grid"></div>
+          </div>
+
+          <div class="demo-sliders-box">
+            <div class="demo-slider-row">
+              <span id="demo-hour-label">HOUR:</span>
+              <input id="demo-hour-slider" type="range" min="1" max="12" value="7" />
+              <span id="demo-hour-val">7</span>
+            </div>
+            <div class="demo-slider-row">
+              <span id="demo-min-label">MINUTE:</span>
+              <input id="demo-minute-slider" type="range" min="0" max="59" value="34" />
+              <span id="demo-minute-val">34</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./app.js"></script>
   </body>
 </html>
