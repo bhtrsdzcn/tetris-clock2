@@ -1055,7 +1055,7 @@ function updateUI() {
 }
 
 // 15. İNTERAKTİF DEMO MODAL IZGARA BOYAMA (SANDBOX)
-function renderDemoGrid(hours, minutes) {
+function renderDemoGrid(hours, minutes, fallingState = null) {
   demoHourCells.forEach(cell => {
     cell.className = "demo-cell";
     cell.style.backgroundColor = "";
@@ -1105,6 +1105,142 @@ function renderDemoGrid(hours, minutes) {
   demoTimeTextEl.textContent = `${hStr}:${mStr} PM`;
   demoHourValEl.textContent = hours;
   demoMinuteValEl.textContent = minutes;
+
+  // Eğer düşüş animasyonu verildiyse parçayı ve ghost outline'ı demo tahtasına çiz
+  if (fallingState && fallingState.incomingShape) {
+    const { incomingShape, targetCol, targetRow, fallingRow } = fallingState;
+
+    // Hedef iniş yeri (Ghost outline)
+    incomingShape.blocks.forEach(([br, bc]) => {
+      const gr = targetRow + br;
+      const gc = targetCol + bc;
+      if (gr >= 0 && gr < GRID_ROWS && gc >= 0 && gc < GRID_COLS) {
+        const cell = demoMinuteCells[gr * GRID_COLS + gc];
+        if (!cell.classList.contains("filled")) {
+          cell.classList.add("ghost");
+        }
+      }
+    });
+
+    // Düşen parça
+    const fallingColor = getShapeColor(incomingShape);
+    incomingShape.blocks.forEach(([br, bc]) => {
+      const fr = fallingRow + br;
+      const fc = targetCol + bc;
+      if (fr >= 0 && fr < GRID_ROWS && fc >= 0 && fc < GRID_COLS) {
+        const cell = demoMinuteCells[fr * GRID_COLS + fc];
+        cell.className = "demo-cell filled";
+        cell.style.backgroundColor = fallingColor;
+      }
+    });
+  }
+}
+
+// 15.b İNTERAKTİF DEMO ANİMASYONLARI (MODAL İÇİNDEN TEST ETME)
+let isDemoAnimating = false;
+
+function runDemoDropAnimation() {
+  if (isDemoAnimating) return;
+  isDemoAnimating = true;
+
+  const hours = parseInt(demoHourSlider.value) || 7;
+  demoMinuteSlider.value = 34;
+  demoMinuteValEl.textContent = "34";
+
+  const flow = getMinuteFlowState(34);
+  const { grid } = packShapes(flow.placedCount, MINS_SEQ, GRID_ROWS, GRID_COLS);
+  const incomingShape = SHAPES[flow.incomingShapeIdx];
+  const targetCol = findBestCol(incomingShape, grid, GRID_ROWS, GRID_COLS);
+  const targetRow = getDropRow(incomingShape, grid, targetCol, GRID_ROWS, GRID_COLS);
+
+  let fallingRow = 0;
+  renderDemoGrid(hours, 34, { incomingShape, targetCol, targetRow, fallingRow });
+  audio.playTick();
+
+  const dropInterval = setInterval(() => {
+    fallingRow++;
+    audio.playTick();
+    renderDemoGrid(hours, 34, { incomingShape, targetCol, targetRow, fallingRow });
+
+    if (fallingRow >= targetRow) {
+      clearInterval(dropInterval);
+      audio.playLock();
+
+      setTimeout(() => {
+        demoMinuteSlider.value = 35;
+        demoMinuteValEl.textContent = "35";
+        renderDemoGrid(hours, 35);
+        isDemoAnimating = false;
+      }, 700);
+    }
+  }, 180);
+}
+
+function runDemoClearAnimation() {
+  if (isDemoAnimating) return;
+  isDemoAnimating = true;
+
+  const hours = parseInt(demoHourSlider.value) || 7;
+  demoMinuteSlider.value = 59;
+  demoMinuteValEl.textContent = "59";
+  renderDemoGrid(hours, 59);
+
+  audio.playLineClear();
+
+  const activeCells = [];
+  for (let r = 0; r < GRID_ROWS; r++) {
+    for (let c = 0; c < GRID_COLS; c++) {
+      const cell = demoMinuteCells[r * GRID_COLS + c];
+      if (cell.classList.contains("filled")) {
+        activeCells.push({ r, c, cell, color: cell.style.backgroundColor });
+      }
+    }
+  }
+
+  let flashStep = 0;
+  const strobeInterval = setInterval(() => {
+    flashStep++;
+    const isWhite = flashStep % 2 === 1;
+
+    activeCells.forEach(({ cell, color }) => {
+      cell.style.backgroundColor = isWhite ? "#ffffff" : color;
+    });
+
+    if (flashStep >= 6) {
+      clearInterval(strobeInterval);
+
+      const colPairs = [
+        [4, 5],
+        [3, 6],
+        [2, 7],
+        [1, 8],
+        [0, 9]
+      ];
+
+      colPairs.forEach((pair, stepIdx) => {
+        setTimeout(() => {
+          activeCells.forEach(({ c, cell }) => {
+            if (pair.includes(c)) {
+              cell.className = "demo-cell";
+              cell.style.backgroundColor = "";
+            }
+          });
+
+          if (stepIdx === colPairs.length - 1) {
+            setTimeout(() => {
+              const nextHour = (hours % 12) + 1;
+              demoHourSlider.value = nextHour;
+              demoHourValEl.textContent = nextHour;
+              demoMinuteSlider.value = 0;
+              demoMinuteValEl.textContent = "0";
+              renderDemoGrid(nextHour, 0);
+              isDemoAnimating = false;
+            }, 100);
+          }
+        }, stepIdx * 50);
+      });
+    }
+  }, 60);
 }
 
 // 16. DÜZENLİ SAYAÇ (TICK)
@@ -1236,24 +1372,36 @@ document.addEventListener("keydown", e => {
     soundBtn.classList.toggle("muted", !isEnabled);
   } else if (key === " " || key === "spacebar") {
     e.preventDefault();
-    runDropAnimationTest();
+    if (infoModalEl.classList.contains("open")) {
+      runDemoDropAnimation();
+    } else {
+      runDropAnimationTest();
+    }
   }
 });
 
 testDropBtn.addEventListener("click", () => {
-  runDropAnimationTest();
+  if (infoModalEl.classList.contains("open")) {
+    runDemoDropAnimation();
+  } else {
+    runDropAnimationTest();
+  }
 });
 
 testClearBtn.addEventListener("click", () => {
-  state.minutes = 59;
-  renderMinutesGrid(59, 0);
-  setTimeout(() => {
-    triggerHourClearAnimation(() => {
-      state.minutes = 0;
-      state.rawHours = (state.rawHours + 1) % 24;
-      updateUI();
-    });
-  }, 200);
+  if (infoModalEl.classList.contains("open")) {
+    runDemoClearAnimation();
+  } else {
+    state.minutes = 59;
+    renderMinutesGrid(59, 0);
+    setTimeout(() => {
+      triggerHourClearAnimation(() => {
+        state.minutes = 0;
+        state.rawHours = (state.rawHours + 1) % 24;
+        updateUI();
+      });
+    }, 200);
+  }
 });
 
 toggleTimeBtn.addEventListener("click", () => {

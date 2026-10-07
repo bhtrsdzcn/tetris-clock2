@@ -757,6 +757,28 @@ body.pm .guide-card {
   box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.4);
 }
 
+.demo-cell.ghost {
+  border: 1px dashed var(--theme-text-primary) !important;
+  background-color: transparent !important;
+  opacity: 0.55;
+}
+
+.demo-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 380px;
+  margin: 2px 0;
+  flex-wrap: wrap;
+}
+
+.demo-actions-bar .btn-pill {
+  font-size: 9.5px;
+  padding: 6px 14px;
+}
+
 .demo-sliders-box {
   width: 100%;
   max-width: 380px;
