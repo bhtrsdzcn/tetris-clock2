@@ -1101,8 +1101,8 @@ body.fullscreen-active .fullscreen-exit-btn,
   align-items: center;
   gap: 6px;
   position: fixed;
-  top: 18px;
-  right: 18px;
+  top: max(16px, env(safe-area-inset-top, 16px));
+  right: max(16px, env(safe-area-inset-right, 16px));
   z-index: 10001;
   background: rgba(18, 18, 22, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.22);
