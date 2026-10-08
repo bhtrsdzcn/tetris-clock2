@@ -464,17 +464,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: var(--total-well-width);
+  width: fit-content;
+  max-width: 100%;
 }
 
 .well-header-bar {
   display: flex;
-  width: var(--total-well-width);
+  width: 100%;
   margin-bottom: 6px;
 }
 
 .well-header {
-  width: var(--well-width);
+  flex: 1;
   text-align: center;
   font-size: 11px;
   font-weight: 700;
@@ -485,13 +486,15 @@ body {
 
 .grids-container {
   display: flex;
-  width: var(--total-well-width);
+  width: fit-content;
+  max-width: 100%;
   border: 2px solid var(--theme-grid-border);
   border-radius: 4px;
   overflow: hidden;
   background: var(--theme-surface);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   transition: var(--transition-theme);
+  box-sizing: content-box;
 }
 
 .grid {
@@ -499,12 +502,19 @@ body {
   grid-template-columns: repeat(10, var(--cell-size));
   grid-template-rows: repeat(15, var(--cell-size));
   position: relative;
-  width: var(--well-width);
+  width: calc(10 * var(--cell-size));
   height: calc(15 * var(--cell-size));
+  flex-shrink: 0;
+  box-sizing: content-box;
 }
 
 .hours-grid {
   border-right: 2px solid var(--theme-divider);
+  box-sizing: content-box;
+}
+
+.minutes-grid {
+  box-sizing: content-box;
 }
 
 .cell {
@@ -512,6 +522,8 @@ body {
   height: var(--cell-size);
   border: 0.5px solid var(--theme-cell-border);
   position: relative;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .cell.filled {
@@ -618,7 +630,7 @@ body.pm .cell.filled {
 /* Legend */
 .legend-bar {
   display: flex;
-  width: var(--total-well-width);
+  width: 100%;
   font-size: 10px;
   letter-spacing: 1px;
   text-align: center;
@@ -628,7 +640,7 @@ body.pm .cell.filled {
 }
 
 .legend-col {
-  width: var(--well-width);
+  flex: 1;
 }
 
 .legend-col strong {
@@ -941,8 +953,8 @@ body.crt-mode.theme-cyberpunk {
 /* Telefonlar ve Dikey Tabletler (<= 768px) */
 @media (max-width: 768px) {
   :root {
-    --cell-size: clamp(14px, 4.3vw, 24px);
-    --next-cell-size: 17px;
+    --cell-size: min(18px, calc((100vw - 36px) / 20));
+    --next-cell-size: 15px;
   }
 
   body {
@@ -977,23 +989,41 @@ body.crt-mode.theme-cyberpunk {
 
   .next-container {
     flex-direction: row;
-    width: auto;
-    gap: 12px;
+    width: 100%;
+    max-width: 360px;
+    gap: 8px;
     align-items: center;
-    padding: 6px 14px;
+    justify-content: space-between;
+    padding: 6px 12px;
     background: var(--theme-surface);
     border: 1px solid var(--theme-grid-border);
     border-radius: 8px;
+    box-sizing: border-box;
   }
 
   .next-title {
     margin-bottom: 0;
-    font-size: 10px;
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
   }
 
-  .next-footer,
+  .next-grid {
+    flex-shrink: 0;
+  }
+
+  .next-footer {
+    margin-top: 0;
+    font-size: 9.5px;
+    white-space: nowrap;
+  }
+
   .status-badge {
     margin-top: 0;
+    font-size: 8.5px;
+    padding: 3px 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .fixed-info-btn {
@@ -1051,8 +1081,8 @@ body.crt-mode.theme-cyberpunk {
 /* Yatay Telefon Modu (Landscape Desk Clock / Screensaver) */
 @media (max-height: 540px) and (orientation: landscape) {
   :root {
-    --cell-size: min(19px, calc((100vh - 120px) / 16));
-    --next-cell-size: 13px;
+    --cell-size: min(20px, calc((100vh - 44px) / 15), calc((100vw - 220px) / 20));
+    --next-cell-size: 13.5px;
   }
 
   body {
@@ -1132,7 +1162,7 @@ body.fullscreen-active .fixed-credits,
 body.fullscreen-active,
 :fullscreen body,
 :-webkit-full-screen body {
-  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0) !important;
+  padding: max(10px, env(safe-area-inset-top, 10px)) max(12px, env(safe-area-inset-right, 12px)) max(10px, env(safe-area-inset-bottom, 10px)) max(12px, env(safe-area-inset-left, 12px)) !important;
   margin: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
@@ -1212,23 +1242,55 @@ body.fullscreen-active .status-badge,
   body.fullscreen-active,
   :fullscreen,
   :-webkit-full-screen {
-    --cell-size: min(18px, calc((100vw - 24px) / 20));
-    --next-cell-size: 16px;
+    --cell-size: min(17.5px, calc((100vw - 36px) / 20));
+    --next-cell-size: 14px;
   }
   body.fullscreen-active .boards-wrapper,
   :fullscreen .boards-wrapper,
   :-webkit-full-screen .boards-wrapper {
     flex-direction: column !important;
-    gap: 16px !important;
+    gap: 14px !important;
     align-items: center !important;
   }
   body.fullscreen-active .next-container,
   :fullscreen .next-container,
   :-webkit-full-screen .next-container {
-    width: var(--total-well-width) !important;
-    max-width: 360px !important;
-    justify-content: space-around !important;
-    padding: 8px 14px !important;
+    width: 100% !important;
+    max-width: 340px !important;
+    justify-content: space-between !important;
+    padding: 6px 12px !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+  }
+  body.fullscreen-active .next-title,
+  :fullscreen .next-title,
+  :-webkit-full-screen .next-title {
+    font-size: 9.5px !important;
+    letter-spacing: 0.1em !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap !important;
+  }
+  body.fullscreen-active .next-grid,
+  :fullscreen .next-grid,
+  :-webkit-full-screen .next-grid {
+    --next-cell-size: 14px !important;
+    flex-shrink: 0 !important;
+  }
+  body.fullscreen-active .next-footer,
+  :fullscreen .next-footer,
+  :-webkit-full-screen .next-footer {
+    font-size: 9.5px !important;
+    margin-top: 0 !important;
+    white-space: nowrap !important;
+  }
+  body.fullscreen-active .status-badge,
+  :fullscreen .status-badge,
+  :-webkit-full-screen .status-badge {
+    font-size: 8.5px !important;
+    padding: 3px 8px !important;
+    margin-top: 0 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 }
 
@@ -1237,24 +1299,46 @@ body.fullscreen-active .status-badge,
   body.fullscreen-active,
   :fullscreen,
   :-webkit-full-screen {
-    --cell-size: min(19px, calc((100vh - 46px) / 16));
+    --cell-size: min(20px, calc((100vh - 44px) / 15), calc((100vw - 220px) / 20));
     --next-cell-size: 13.5px;
   }
   body.fullscreen-active .boards-wrapper,
   :fullscreen .boards-wrapper,
   :-webkit-full-screen .boards-wrapper {
     flex-direction: row !important;
-    gap: 28px !important;
+    gap: 20px !important;
     align-items: center !important;
   }
   body.fullscreen-active .next-container,
   :fullscreen .next-container,
   :-webkit-full-screen .next-container {
     flex-direction: column !important;
-    width: 140px !important;
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
+    width: 120px !important;
+    padding: 8px !important;
+    background: var(--theme-surface) !important;
+    border: 1px solid var(--theme-grid-border) !important;
+    border-radius: 8px !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+  body.fullscreen-active .next-title,
+  :fullscreen .next-title,
+  :-webkit-full-screen .next-title {
+    font-size: 9.5px !important;
+    margin-bottom: 0 !important;
+  }
+  body.fullscreen-active .next-footer,
+  :fullscreen .next-footer,
+  :-webkit-full-screen .next-footer {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+  }
+  body.fullscreen-active .status-badge,
+  :fullscreen .status-badge,
+  :-webkit-full-screen .status-badge {
+    font-size: 8px !important;
+    padding: 2px 7px !important;
+    margin-top: 0 !important;
   }
 }
 
