@@ -505,6 +505,15 @@ body.pm .cell.filled {
   z-index: 5;
 }
 
+.cell.falling.uncolored-falling,
+.demo-cell.filled.uncolored-falling {
+  border: 1px solid var(--theme-cell-border) !important;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.45),
+              inset -2px -2px 0 rgba(0, 0, 0, 0.35),
+              0 4px 10px rgba(0, 0, 0, 0.25) !important;
+  opacity: 0.95;
+}
+
 /* NEXT Preview Box */
 .next-container {
   display: flex;
@@ -1036,11 +1045,13 @@ body.fullscreen-active .fixed-info-btn,
 body.fullscreen-active,
 :fullscreen body,
 :-webkit-full-screen body {
-  padding: 0 !important;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0) !important;
   margin: 0 !important;
   width: 100vw !important;
   height: 100vh !important;
+  height: 100dvh !important;
   min-height: 100vh !important;
+  min-height: 100dvh !important;
   overflow: hidden !important;
   display: flex !important;
   align-items: center !important;
@@ -1077,19 +1088,54 @@ body.fullscreen-active,
   --next-cell-size: 19px;
 }
 
+/* Telefonlar ve Dikey Ekranlar (Mobil Tam Ekran) */
 @media (orientation: portrait) and (max-width: 768px) {
   body.fullscreen-active,
   :fullscreen,
   :-webkit-full-screen {
-    --cell-size: clamp(14px, 4.2vw, 22px);
+    --cell-size: min(18px, calc((100vw - 24px) / 20));
     --next-cell-size: 16px;
   }
   body.fullscreen-active .boards-wrapper,
   :fullscreen .boards-wrapper,
   :-webkit-full-screen .boards-wrapper {
     flex-direction: column !important;
-    gap: 18px !important;
+    gap: 16px !important;
     align-items: center !important;
+  }
+  body.fullscreen-active .next-container,
+  :fullscreen .next-container,
+  :-webkit-full-screen .next-container {
+    width: var(--total-well-width) !important;
+    max-width: 360px !important;
+    justify-content: space-around !important;
+    padding: 8px 14px !important;
+  }
+}
+
+/* Telefonlar Yatay Çevrildiğinde (Gerçek Başucu / Masa Saati Modu) */
+@media (orientation: landscape) and (max-height: 540px) {
+  body.fullscreen-active,
+  :fullscreen,
+  :-webkit-full-screen {
+    --cell-size: min(19px, calc((100vh - 46px) / 16));
+    --next-cell-size: 13.5px;
+  }
+  body.fullscreen-active .boards-wrapper,
+  :fullscreen .boards-wrapper,
+  :-webkit-full-screen .boards-wrapper {
+    flex-direction: row !important;
+    gap: 28px !important;
+    align-items: center !important;
+  }
+  body.fullscreen-active .next-container,
+  :fullscreen .next-container,
+  :-webkit-full-screen .next-container {
+    flex-direction: column !important;
+    width: 140px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
   }
 }
 

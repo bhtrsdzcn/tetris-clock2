@@ -733,15 +733,14 @@ function renderMinutesGrid(minutes, seconds) {
       }
       state.previousFallingRow = fallingRow;
 
-      // 2.c) Düşen parçayı çiz
-      const fallingColor = getShapeColor(incomingShape);
+      // 2.c) Düşen parçayı çiz (Kullanıcı isteği: parça renksiz/boş blok olarak iner, yerine kilitlenince ilk karesi dolar)
       incomingShape.blocks.forEach(([br, bc]) => {
         const fr = fallingRow + br;
         const fc = targetCol + bc;
         if (fr >= 0 && fr < GRID_ROWS && fc >= 0 && fc < GRID_COLS) {
           const cell = minuteCells[fr * GRID_COLS + fc];
-          cell.className = "cell filled falling";
-          cell.style.backgroundColor = fallingColor;
+          cell.className = "cell filled falling uncolored-falling";
+          cell.style.backgroundColor = grayColor;
         }
       });
 
@@ -1157,15 +1156,14 @@ function renderDemoGrid(hours, minutes, fallingState = null) {
       }
     });
 
-    // Düşen parça
-    const fallingColor = getShapeColor(incomingShape);
+    // Düşen parça (Renksiz/boş blok olarak iner, yerine oturunca ilk karesi dolar)
     incomingShape.blocks.forEach(([br, bc]) => {
       const fr = fallingRow + br;
       const fc = targetCol + bc;
       if (fr >= 0 && fr < GRID_ROWS && fc >= 0 && fc < GRID_COLS) {
         const cell = demoMinuteCells[fr * GRID_COLS + fc];
-        cell.className = "demo-cell filled";
-        cell.style.backgroundColor = fallingColor;
+        cell.className = "demo-cell filled uncolored-falling";
+        cell.style.backgroundColor = grayColor;
       }
     });
   }
