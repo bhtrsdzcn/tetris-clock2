@@ -410,6 +410,47 @@ body {
 }
 
 /* ========================================================
+   SAĞ ALT İMZA (CREDITS)
+   ======================================================== */
+.fixed-credits {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  background: var(--theme-surface);
+  border: 1.5px solid var(--theme-grid-border);
+  color: var(--theme-text-primary);
+  opacity: 0.85;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+  user-select: none;
+}
+
+.fixed-credits span {
+  opacity: 0.65;
+}
+
+.fixed-credits strong {
+  font-weight: 700;
+  color: var(--theme-text-primary);
+  letter-spacing: 0.06em;
+}
+
+.fixed-credits:hover {
+  opacity: 1;
+  transform: translateY(-2px) scale(1.03);
+  border-color: var(--theme-text-primary);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================================
    GRID ALANI VE HİZALAMA
    ======================================================== */
 .boards-wrapper {
@@ -821,6 +862,23 @@ body.pm .guide-card {
   font-weight: bold;
 }
 
+.modal-footer-credits {
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--theme-divider);
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  opacity: 0.82;
+  user-select: none;
+}
+
+.modal-footer-credits strong {
+  font-weight: 700;
+  color: var(--theme-text-primary);
+  letter-spacing: 0.08em;
+}
+
 /* ========================================================
    CRT SCANLINE & RETRO TÜPLÜ TV EFEKTİ
    ======================================================== */
@@ -945,6 +1003,14 @@ body.crt-mode.theme-cyberpunk {
     font-size: 9.5px;
   }
 
+  .fixed-credits {
+    bottom: 12px;
+    right: 12px;
+    padding: 6px 12px;
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+  }
+
   .modal-card {
     padding: 16px;
   }
@@ -952,6 +1018,17 @@ body.crt-mode.theme-cyberpunk {
   .info-guide-grid {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fixed-credits span {
+    display: none;
+  }
+  .fixed-credits strong::before {
+    content: "by ";
+    font-weight: 400;
+    opacity: 0.7;
   }
 }
 
@@ -1013,6 +1090,13 @@ body.crt-mode.theme-cyberpunk {
     padding: 4px 8px;
     font-size: 8px;
   }
+
+  .fixed-credits {
+    bottom: 6px;
+    right: 6px;
+    padding: 4px 8px;
+    font-size: 8px;
+  }
 }
 
 /* ========================================================
@@ -1037,7 +1121,10 @@ body.fullscreen-active .legend-bar,
 :-webkit-full-screen .legend-bar,
 body.fullscreen-active .fixed-info-btn,
 :fullscreen .fixed-info-btn,
-:-webkit-full-screen .fixed-info-btn {
+:-webkit-full-screen .fixed-info-btn,
+body.fullscreen-active .fixed-credits,
+:fullscreen .fixed-credits,
+:-webkit-full-screen .fixed-credits {
   display: none !important;
 }
 
